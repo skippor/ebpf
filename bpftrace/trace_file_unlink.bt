@@ -1,0 +1,22 @@
+#!/usr/bin/env bpftrace
+
+#include <linux/sched.h>
+#include <linux/dcache.h>
+
+tracepoint:syscalls:sys_enter_unlink,tracepoint:syscalls:sys_enter_unlinkat {
+    printf("%s deleted by command '%s' with pid %d\n",
+            str(args->pathname), comm, pid);
+    $p = curtask->real_parent;
+    $i = 0;
+    while ($i < 100) {
+        $i++;
+        printf(" ... whose parent is '%s' command with pid %d\n",
+               $p->comm,
+               $p->tgid);
+        $p = $p->parent;
+        if ($p == 0 || $p->tgid == 0) {
+            break;
+        }
+    }
+}
+

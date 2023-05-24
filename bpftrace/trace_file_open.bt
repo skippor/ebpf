@@ -1,0 +1,12 @@
+#!/usr/bin/env bpftrace
+
+// 监控文件被打开的系统调用
+tracepoint:syscalls:sys_enter_openat
+{
+  // 获取文件名
+  char *filename = (char *)arg2;
+
+  // 打印进程ID和文件名
+  printf("File %s opened by PID %d\n", filename, pid);
+}
+
